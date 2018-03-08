@@ -1,6 +1,7 @@
 package io.github.steven_gleason.util.cal;
 
 import java.util.Calendar;
+import java.util.LinkedHashSet;
 
 public class DarianCalendar extends Calendar
 {
@@ -50,6 +51,8 @@ public class DarianCalendar extends Calendar
 	public static final int VENERIS = FRIDAY;
 	public static final int SATURNI = SATURDAY;
 
+
+	private static final long MILLIS_IN_SOL = 1000 * 60 * 60 * 24;
 
 	private static final int[] maximum = {
 		/* ERA */ 1,
@@ -112,6 +115,7 @@ public class DarianCalendar extends Calendar
 	};
 
 	private boolean extendedIntercalculation = false;
+	private LinkedHashSet<Integer> fieldChangeHistory = new LinkedHashSet<>();
 
 	@Override
 	public void add(int field, int amount)
@@ -121,11 +125,28 @@ public class DarianCalendar extends Calendar
 	@Override
 	protected void computeFields()
 	{
+
+		set(ERA, time < 0 ? 0 : 1);
+
+		int year = calculateYear();
+		int approxYear = time / millisInAverageYear;
+
+		set(YEAR, year);
+		set(SOL_OF_YEAR, sol);
+
+		// sort out the rest of the dates from Year & Day of Year.
+
+		// set time fields
+
 	}
 
 	@Override
 	protected void computeTime()
 	{
+		if (!isLenient())
+		{
+			validateFields();
+		}
 	}
 
 /*optional
@@ -136,7 +157,7 @@ public class DarianCalendar extends Calendar
 		switch (field)
 		{
 			case SOL_OF_MONTH:
-				max = daysInMonth();
+				max = solsInMonth();
 				break;
 
 			case SOL_OF_YEAR:
@@ -234,6 +255,14 @@ public class DarianCalendar extends Calendar
 	{
 	}
 */
+	
+	@Override
+	public void set(int field, int value)
+	{
+		fieldChangeHistory.remove(field);
+		fieldChangeHistory.add(field);
+		super.set(field, value);
+	}
 
 	public boolean isExtendedIntercalculation()
 	{
@@ -245,12 +274,12 @@ public class DarianCalendar extends Calendar
 		extendedIntercalculation = extended;
 	}
 
-	private int daysInMonth()
+	private int solsInMonth()
 	{
-		return daysInMonth(get(MONTH), get(YEAR));
+		return solsInMonth(internalGet(MONTH), internalGet(YEAR));
 	}
 
-	private int daysInMonth(int month, int year)
+	int solsInMonth(int month, int year)
 	{
 		int days;
 
@@ -330,7 +359,7 @@ public class DarianCalendar extends Calendar
 	{
 		int maxSol;
 
-		if (get(WEEK_OF_MONTH) == 4 && daysInMonth() == 27)
+		if (get(WEEK_OF_MONTH) == 4 && solsInMonth() == 27)
 		{
 			maxSol = VENERIS;
 		}
@@ -342,4 +371,110 @@ public class DarianCalendar extends Calendar
 		return maxSol;
 	}
 
+	private int calculateYear()
+	{
+		long millisInCommonYear = 668 * MILLIS_IN_SOL;
+		long millisInLeapYear = millisInCommonYear + MILLIS_IN_SOL;
+		long millisInAverageYear = 668.5991 * MILLIS_IN_SOL;
+	}
+
+	private int solOfYearFromChangeHistory()
+	{
+		Stack<Integer> changeStack = new Stack<>();
+
+		// use a stack to get the newest first
+		for (Integer field : fieldChangeHistory)
+		{
+			changeStack.push(field);
+		}
+
+		boolean[] newestFields = new int[FIELD_COUNT];
+		for (Integer field : changeStack)
+		{
+			newestFields[field] = true;
+			Integer sol = solOfYearFromChangeHistory(newestFields);
+			if (sol != null)
+			{
+				return sol;
+			}
+		}
+
+		// insufficient data
+		return 0;
+	}
+
+	/**
+	 * pre: YEAR is set
+	 */
+	private Integer solOfYearFromChangeHistory(boolean[] newest)
+	{
+		Integer sol = null;
+		if (newest[MONTH] && newest[SOL_OF_MONTH])
+		{
+		}
+		else if (newest[MONTH] && newest[WEEK_OF_MONTH] && newest[SOL_OF_WEEK])
+		{
+		}
+		else if (newest[MONTH] && newest[SOL_OF_WEEK_IN_MONTH] && newest[SOL_OF_WEEK])
+		{
+		}
+		else if (newest[SOL_OF_YEAR])
+		{
+			sol = internalGet(SOL_OF_YEAR);
+		}
+		else if (newest[SOL_OF_WEEK] && newest[WEEK_OF_YEAR])
+		{
+		}
+		return sol;
+	}
+
+	/**
+	 * Not Lenient
+	 * Throw errors for fields out of range
+	 */
+	private void validateFields()
+	{
+		boolean valid = true;
+
+		for (int i = 0; i < FIELD_COUNT; ++i)
+		{
+			if (isSet(i))
+			{
+				validateField(i);
+			}
+		}
+	}
+
+	private void validateField(int field)
+	{
+		int val = internalGet(field);
+		if (val < getMinimum(i) || val > getMaximum(i))
+		{
+			thow new IllegalArgumentException();
+		}
+
+		// need to consider Month (and leap year) for Sol fields
+	}
+
+	/**
+	 * special cases for SOL_OF_YEAR
+	 * - not leap day on a common year
+	 */
+	private void validateSolOfYear(int sol, int year)
+	{
+		if (sol > getLeastMaximum(SOL_OF_YEAR)
+				&& !isLeapYear())
+		{
+			throw new IllegalArgumentException("SOL_OF_YEAR is the Leap Sol, but it is the common year " + year);
+		}
+	}
+
+	/**
+	 * special cases for SOL_OF_MONTH
+	 * - not Sol 28 in a 27 Sol Month
+	 */
+	private void validateSolOfMonth(int sol, int month, int year)
+	{
+		if (sol == 28 && 
+	}
 }

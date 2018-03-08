@@ -2,6 +2,7 @@ package io.github.steven_gleason.util.cal;
 
 import java.util.Calendar;
 import java.util.LinkedHashSet;
+import java.util.Stack;
 
 public class DarianCalendar extends Calendar
 {
@@ -114,7 +115,7 @@ public class DarianCalendar extends Calendar
 		/* DST_OFFSET */ Integer.MIN_VALUE
 	};
 
-	private boolean extendedIntercalculation = false;
+	private boolean extendedIntercalation = false;
 	private LinkedHashSet<Integer> fieldChangeHistory = new LinkedHashSet<>();
 
 	@Override
@@ -129,10 +130,9 @@ public class DarianCalendar extends Calendar
 		set(ERA, time < 0 ? 0 : 1);
 
 		int year = calculateYear();
-		int approxYear = time / millisInAverageYear;
 
 		set(YEAR, year);
-		set(SOL_OF_YEAR, sol);
+		//set(SOL_OF_YEAR, sol);
 
 		// sort out the rest of the dates from Year & Day of Year.
 
@@ -264,14 +264,14 @@ public class DarianCalendar extends Calendar
 		super.set(field, value);
 	}
 
-	public boolean isExtendedIntercalculation()
+	public boolean isExtendedIntercalation()
 	{
-		return extendedIntercalculation;
+		return extendedIntercalation;
 	}
 
-	public void setExtendedIntercalculation(boolean extended)
+	public void setExtendedIntercalation(boolean extended)
 	{
-		extendedIntercalculation = extended;
+		extendedIntercalation = extended;
 	}
 
 	private int solsInMonth()
@@ -305,54 +305,37 @@ public class DarianCalendar extends Calendar
 	{
 		boolean leap;
 
-		if (extendedIntercalculation && 0 <= year && year <= 10000)
+		if (extendedIntercalation)
 		{
-			leap = isExtendedSchemeLeapYear(year);
+			leap = DarianYearCalculator.isExtendedSchemeLeapYear(year);
 		}
 		else
 		{
-			leap = year % 500 == 0 || (isSimpleLeapYear(year) && year % 100 != 0);
+			leap = DarianYearCalculator.isSimpleSchemeLeapYear(year);
 		}
 		
 		return leap;
 	}
 
-	private boolean isExtendedSchemeLeapYear(int year)
+	private int calculateYear()
 	{
-		if (0 <= year && year <= 2000)
+		return calculateYear(time);
+	}
+
+	private int calculateYear(long millis)
+	{
+		int year;
+
+		if (extendedIntercalation)
 		{
-			leap = (year % 1000 == 0) || (isSimpleLeapYear(year) && year % 100 != 0);
-		}
-		else if (2001 <= year && year <= 4800)
-		{
-			leap = isSimpleLeapYear(year) && year % 150 != 0;
-		}
-		else if (4801 <= year && year <= 6800)
-		{
-			leap = isSimpleLeapYear(year) && year % 200 != 0;
-		}
-		else if (6801 <= year && year <= 8400)
-		{
-			leap = isSimpleLeapYear(year) && year % 300 != 0;
-		}
-		else if (8401 <= year && year <= 10000)
-		{
-			leap = isSimpleLeapYear(year) && year % 600 != 0;
+			year = DarianYearCalculator.calculateExtendedSchemeYear(millis);
 		}
 		else
 		{
-			throw new IllegalArgumentException("Extended Intercalculation is not defined for years before 0 or after 10000. Year is: " + year);
+			year = DarianYearCalculator.calculateSimpleSchemeYear(millis);
 		}
 
-		return leap;
-	}
-
-	/**
-	 * odd years and multiples of 10
-	 **/
-	private boolean isSimpleLeapYear(int year)
-	{
-		return (year % 2 != 0) || (year % 10 == 0);
+		return year;
 	}
 
 	private int maxSolOfWeek()
@@ -371,13 +354,6 @@ public class DarianCalendar extends Calendar
 		return maxSol;
 	}
 
-	private int calculateYear()
-	{
-		long millisInCommonYear = 668 * MILLIS_IN_SOL;
-		long millisInLeapYear = millisInCommonYear + MILLIS_IN_SOL;
-		long millisInAverageYear = 668.5991 * MILLIS_IN_SOL;
-	}
-
 	private int solOfYearFromChangeHistory()
 	{
 		Stack<Integer> changeStack = new Stack<>();
@@ -388,7 +364,7 @@ public class DarianCalendar extends Calendar
 			changeStack.push(field);
 		}
 
-		boolean[] newestFields = new int[FIELD_COUNT];
+		boolean[] newestFields = new boolean[FIELD_COUNT];
 		for (Integer field : changeStack)
 		{
 			newestFields[field] = true;
@@ -448,9 +424,9 @@ public class DarianCalendar extends Calendar
 	private void validateField(int field)
 	{
 		int val = internalGet(field);
-		if (val < getMinimum(i) || val > getMaximum(i))
+		if (val < getMinimum(field) || val > getMaximum(field))
 		{
-			thow new IllegalArgumentException();
+			throw new IllegalArgumentException();
 		}
 
 		// need to consider Month (and leap year) for Sol fields
@@ -475,6 +451,6 @@ public class DarianCalendar extends Calendar
 	 */
 	private void validateSolOfMonth(int sol, int month, int year)
 	{
-		if (sol == 28 && 
+		//if (sol == 28 && 
 	}
 }

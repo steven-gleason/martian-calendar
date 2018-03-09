@@ -104,14 +104,50 @@ class DarianYearCalculator
 
 	static int calculateSimpleSchemeYear(long millis)
 	{
+		// TODO: smarter
+
+		// TODO if (millis < 0)
+
+		int year = 0;
+		while (countTimeTillSimpleSchemeYears(year) < millis)
+		{
+			++year;
+		}
+
+		if (countTimeTillSimpleSchemeYears(year) > millis)
+		{
+			--year;
+		}
+
+		return year;
+	}
+
+	/**
+	 * Number of martian milliseconds from the epoch to the beginning of the year
+	 */
+	static long countTimeTillSimpleSchemeYears(int years)
+	{
+		// TODO: smarter
+
 		long millisInCommonYear = 668 * MILLIS_IN_SOL;
 		long millisInLeapYear = millisInCommonYear + MILLIS_IN_SOL;
-		//long millisInAverageYear = 668.5991 * MILLIS_IN_SOL;
-		//int approxYear = time / millisInAverageYear;
-		//int leapYearsInExtendedScheme = 
-		//long millisInExtendedScheme = 10000 * millisInCommonYear + leapYearsInExtendedScheme * MILIS_IN_SOL;
+		long milliSum = 0;
+		int yearCount = 0;
+		//TODO: if (years < 0)
 
-			return 0;
+		while (++yearCount <= years)
+		{
+			if (isSimpleSchemeLeapYear(yearCount))
+			{
+				milliSum += millisInLeapYear;
+			}
+			else
+			{
+				milliSum += millisInCommonYear;
+			}
+		}
+
+		return milliSum;
 	}
 
 }

@@ -2,7 +2,7 @@ package io.github.steven_gleason.util.cal;
 
 class DarianSimpleSchemeCalculator implements IntercalationCalculator
 {
-	private static final long MILLIS_IN_SOL = 1000 * 60 * 60 * 24;
+	private static final long MILLIS_IN_SOL = 1000L * 60 * 60 * 24;
 
 	@Override
 	public boolean isLeapYear(int year)
@@ -43,17 +43,33 @@ class DarianSimpleSchemeCalculator implements IntercalationCalculator
 		long millisInLeapYear = millisInCommonYear + MILLIS_IN_SOL;
 		long milliSum = 0;
 		int yearCount = 0;
-		//TODO: if (year < 0)
 
-		while (++yearCount <= year)
+		if (year < 0)
 		{
-			if (isLeapYear(yearCount))
+			while (yearCount-- > year)
 			{
-				milliSum += millisInLeapYear;
+				if (isLeapYear(yearCount))
+				{
+					milliSum -= millisInLeapYear;
+				}
+				else
+				{
+					milliSum -= millisInCommonYear;
+				}
 			}
-			else
+		}
+		else
+		{
+			while (yearCount++ < year)
 			{
-				milliSum += millisInCommonYear;
+				if (isLeapYear(yearCount))
+				{
+					milliSum += millisInLeapYear;
+				}
+				else
+				{
+					milliSum += millisInCommonYear;
+				}
 			}
 		}
 

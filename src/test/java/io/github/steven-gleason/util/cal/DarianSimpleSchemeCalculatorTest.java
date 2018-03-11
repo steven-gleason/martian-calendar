@@ -4,17 +4,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
 import org.junit.Test;
 
-public class DarianYearCalculatorTest
+public class DarianSimpleSchemeCalculatorTest
 {
 
 	private static final long SOL = 24 * 60 * 60 * 1000L;
 
-	//////// Test isSimpleSchemeLeapYear ////////
+	private DarianSimpleSchemeCalculator testSubject;
+
+	@Before
+	public void setUp()
+	{
+		testSubject = new DarianSimpleSchemeCalculator();
+	}
+
+	//////// Test isLeapYear ////////
 
 	@Test
-	public void testSimpleSchemeCommonYearsOnEvens()
+	public void testCommonYearsOnEvens()
 	{
 		assertFalse(isSimpleLeap(-504));
 		assertFalse(isSimpleLeap(-116));
@@ -29,7 +38,7 @@ public class DarianYearCalculatorTest
 	}
 
 	@Test
-	public void testSimpleSchemeLeapYearsOnOdds()
+	public void testLeapYearsOnOdds()
 	{
 		assertTrue(isSimpleLeap(-14124343));
 		assertTrue(isSimpleLeap(-505));
@@ -64,7 +73,7 @@ public class DarianYearCalculatorTest
 	}
 
 	@Test
-	public void testSimpleSchemeLeapYearsEvery10()
+	public void testLeapYearsEvery10()
 	{
 		assertTrue(isSimpleLeap(-2130));
 		assertTrue(isSimpleLeap(-110));
@@ -77,7 +86,7 @@ public class DarianYearCalculatorTest
 	}
 
 	@Test
-	public void testSimpleSchemeCommonYearsEvery100()
+	public void testCommonYearsEvery100()
 	{
 		assertFalse(isSimpleLeap(-1700));
 		assertFalse(isSimpleLeap(-200));
@@ -88,7 +97,7 @@ public class DarianYearCalculatorTest
 	}
 
 	@Test
-	public void testSimpleSchemeLeapYearsEvery500()
+	public void testLeapYearsEvery500()
 	{
 		assertTrue(isSimpleLeap(-30000));
 		assertTrue(isSimpleLeap(-1000));
@@ -101,15 +110,18 @@ public class DarianYearCalculatorTest
 
 	private boolean isSimpleLeap(int year)
 	{
-		return DarianYearCalculator.isSimpleSchemeLeapYear(year);
+		return testSubject.isLeapYear(year);
 	}
 
 
-	//////// Test calculateSimpleSchemeYear ////////
+	//////// Test calculateYear ////////
 
 	@Test
-	public void testCalculateSimpleSchemeYear()
+	public void testCalculateYear()
 	{
+		//assertEquals(-2, simpleYear(-669 * SOL));
+		assertEquals(-1, simpleYear(-668 * SOL));
+		assertEquals(-1, simpleYear(-1L));
 		assertEquals(0, simpleYear(0L)); // beginning of sol 1
 		assertEquals(0, simpleYear(600 * SOL)); // bg of sol 601
 		assertEquals(0, simpleYear(668 * SOL)); // bg of sol 669
@@ -123,23 +135,23 @@ public class DarianYearCalculatorTest
 
 	private int simpleYear(Long millis)
 	{
-		return DarianYearCalculator.calculateSimpleSchemeYear(millis);
+		return testSubject.calculateYear(millis);
 	}
 
 
-	//////// Test Year to Millis - Simple Scheme ////////
+	//////// Test calculateTime ////////
 
 	@Test
-	public void testCountTimeTillSimpleSchemeYears()
+	public void testCalculateTime()
 	{
-		assertEquals(0, simpleMillis(0));
-		assertEquals(57801600000L, simpleMillis(1));
-		assertEquals(669 * SOL, simpleMillis(1));
-		assertEquals(3408220800000L, simpleMillis(59));
+		assertEquals(0, calculateTime(0));
+		assertEquals(57801600000L, calculateTime(1));
+		assertEquals(669 * SOL, calculateTime(1));
+		assertEquals(3408220800000L, calculateTime(59));
 	}
 
-	private long simpleMillis(int year)
+	private long calculateTime(int year)
 	{
-		return DarianYearCalculator.countTimeTillSimpleSchemeYears(year);
+		return testSubject.calculateTime(year);
 	}
 }

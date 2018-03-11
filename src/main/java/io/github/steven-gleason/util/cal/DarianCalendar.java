@@ -115,7 +115,7 @@ public class DarianCalendar extends Calendar
 		/* DST_OFFSET */ Integer.MIN_VALUE
 	};
 
-	private boolean extendedIntercalation = false;
+	private IntercalationCalculator intercalationCalculator = new DarianSimpleSchemeCalculator();
 	private LinkedHashSet<Integer> fieldChangeHistory = new LinkedHashSet<>();
 
 	@Override
@@ -264,14 +264,10 @@ public class DarianCalendar extends Calendar
 		super.set(field, value);
 	}
 
-	public boolean isExtendedIntercalation()
+	public void setIntercalationCalculator(IntercalationCalculator calculator)
 	{
-		return extendedIntercalation;
-	}
-
-	public void setExtendedIntercalation(boolean extended)
-	{
-		extendedIntercalation = extended;
+		intercalationCalculator = calculator;
+		// TODO: re-calculate time or fields
 	}
 
 	private int solsInMonth()
@@ -303,18 +299,7 @@ public class DarianCalendar extends Calendar
 
 	private boolean isLeapYear(int year)
 	{
-		boolean leap;
-
-		if (extendedIntercalation)
-		{
-			leap = DarianYearCalculator.isExtendedSchemeLeapYear(year);
-		}
-		else
-		{
-			leap = DarianYearCalculator.isSimpleSchemeLeapYear(year);
-		}
-		
-		return leap;
+		return intercalationCalculator.isLeapYear(year);
 	}
 
 	private int calculateYear()
@@ -324,18 +309,7 @@ public class DarianCalendar extends Calendar
 
 	private int calculateYear(long millis)
 	{
-		int year;
-
-		if (extendedIntercalation)
-		{
-			year = DarianYearCalculator.calculateExtendedSchemeYear(millis);
-		}
-		else
-		{
-			year = DarianYearCalculator.calculateSimpleSchemeYear(millis);
-		}
-
-		return year;
+		return intercalationCalculator.calculateYear(millis);
 	}
 
 	private int maxSolOfWeek()

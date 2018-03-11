@@ -119,12 +119,12 @@ public class DarianSimpleSchemeCalculatorTest
 	@Test
 	public void testCalculateYear()
 	{
-		assertEquals(0, simpleYear(0L)); // beginning of sol 1
-		assertEquals(0, simpleYear(600 * SOL)); // bg of sol 601
-		assertEquals(0, simpleYear(668 * SOL)); // bg of sol 669
+		assertEquals(0, simpleYear(0L)); // epoch, start of sol 1
+		assertEquals(0, simpleYear(600 * SOL)); // start of sol 601
+		assertEquals(0, simpleYear(668 * SOL)); // start of sol 669
 		assertEquals(0, simpleYear(669 * SOL - 1)); // end of sol 669
-		assertEquals(1, simpleYear(669 * SOL)); // bg of sol 670
-		assertEquals(1, simpleYear(670 * SOL)); // bg of sol 671
+		assertEquals(1, simpleYear(669 * SOL)); // start of sol 670
+		assertEquals(1, simpleYear(670 * SOL)); // start of sol 671
 		assertEquals(59, simpleYear(40000 * SOL));
 		assertEquals(8, simpleYear(500000000000L));
 		assertEquals(1846, simpleYear(1234567 * SOL));
@@ -133,9 +133,12 @@ public class DarianSimpleSchemeCalculatorTest
 	@Test
 	public void testCalculateNegativeYear()
 	{
-		//assertEquals(-2, simpleYear(-669 * SOL));
-		assertEquals(-1, simpleYear(-668 * SOL));
-		assertEquals(-1, simpleYear(-1L));
+		assertEquals(-1, simpleYear(-1L)); // moment before epoch
+		assertEquals(-1, simpleYear(-669 * SOL)); // start of year -1
+		assertEquals(-2, simpleYear(-669 * SOL - 1)); // end of year -2
+		assertEquals(-60, simpleYear(-40000 * SOL));
+		assertEquals(-9, simpleYear(-500000000000L));
+		assertEquals(-1847, simpleYear(-1234567 * SOL));
 	}
 
 	private int simpleYear(Long millis)

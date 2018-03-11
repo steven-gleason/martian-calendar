@@ -23,7 +23,7 @@ class DarianSimpleSchemeCalculator implements IntercalationCalculator
 			++year;
 		}
 
-		if (calculateTime(year) > millis)
+		while (calculateTime(year) > millis)
 		{
 			--year;
 		}
@@ -37,39 +37,37 @@ class DarianSimpleSchemeCalculator implements IntercalationCalculator
 	@Override
 	public long calculateTime(int year)
 	{
-		// TODO: smarter
+		long milliSum;
 
+		if (year < 0)
+		{
+			milliSum = -calculatePositiveTime(-year);
+		}
+		else
+		{
+			milliSum = calculatePositiveTime(year);
+		}
+
+		return milliSum;
+	}
+
+	private long calculatePositiveTime(int year)
+	{
+		// TODO: smarter
 		long millisInCommonYear = 668 * MILLIS_IN_SOL;
 		long millisInLeapYear = millisInCommonYear + MILLIS_IN_SOL;
 		long milliSum = 0;
 		int yearCount = 0;
 
-		if (year < 0)
+		while (yearCount++ < year)
 		{
-			while (yearCount-- > year)
+			if (isLeapYear(yearCount))
 			{
-				if (isLeapYear(yearCount))
-				{
-					milliSum -= millisInLeapYear;
-				}
-				else
-				{
-					milliSum -= millisInCommonYear;
-				}
+				milliSum += millisInLeapYear;
 			}
-		}
-		else
-		{
-			while (yearCount++ < year)
+			else
 			{
-				if (isLeapYear(yearCount))
-				{
-					milliSum += millisInLeapYear;
-				}
-				else
-				{
-					milliSum += millisInCommonYear;
-				}
+				milliSum += millisInCommonYear;
 			}
 		}
 

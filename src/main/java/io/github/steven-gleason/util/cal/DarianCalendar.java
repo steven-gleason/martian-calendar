@@ -132,7 +132,18 @@ public class DarianCalendar extends Calendar
 		int year = calculateYear();
 
 		set(YEAR, year);
-		//set(SOL_OF_YEAR, sol);
+
+		// TODO: don't repeat calculation
+		long millisRemaining = time - intercalationCalculator.calculateTime(year);
+		int solOfYear = ((int) (millisRemaining / MILLIS_IN_SOL)) + 1;
+		set(SOL_OF_YEAR, solOfYear);
+
+		int month = calculateMonthFromSolOfYear(solOfYear);
+		set(MONTH, month);
+
+		int solOfMonth = calculateSolOfMonthFromMonthAndSolOfYear(month, solOfYear);
+		set(SOL_OF_MONTH, solOfMonth);
+
 
 		// sort out the rest of the dates from Year & Day of Year.
 
@@ -376,6 +387,41 @@ public class DarianCalendar extends Calendar
 		{
 		}
 		return sol;
+	}
+
+	private int calculateMonthFromSolOfYear(int solOfYear)
+	{
+		int sol = 1;
+		int month = SAGITTARIUS;
+		int year = internalGet(YEAR);
+/*
+		while (sol < solOfYear)
+		{
+			if (month > VRISHIKA)
+			{
+				++year;
+				month = SAGITTARIUS;
+			}
+			sol += solsInMonth(month++, year);
+		}
+*/
+		return month;
+	}
+
+	/**
+	 * @param month (0-23)
+	 * @param solOfYear (1-669)
+	 */
+	private int calculateSolOfMonthFromMonthAndSolOfYear(int month, int solOfYear)
+	{
+		int solSum = 0;
+
+		for (int i = 0; i < month; ++i)
+		{
+			solSum += solsInMonth(i, internalGet(YEAR));
+		}
+
+		return solOfYear - solSum;
 	}
 
 	/**

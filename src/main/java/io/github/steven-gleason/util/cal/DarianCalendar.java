@@ -144,6 +144,14 @@ public class DarianCalendar extends Calendar
 		int solOfMonth = calculateSolOfMonthFromMonthAndSolOfYear(month, solOfYear);
 		set(SOL_OF_MONTH, solOfMonth);
 
+		int weekOfYear = calculateWeekOfYearFromSolOfYear(solOfYear);
+		set(WEEK_OF_YEAR, weekOfYear);
+
+		int weekOfMonth = calculateWeekOfMonthFromWeekOfYear(weekOfYear);
+		set(WEEK_OF_MONTH, weekOfMonth);
+
+		int solOfWeek = calculateSolOfWeekFromSolOfYear(solOfYear);
+		set(SOL_OF_WEEK, solOfWeek);
 
 		// sort out the rest of the dates from Year & Day of Year.
 
@@ -409,8 +417,8 @@ public class DarianCalendar extends Calendar
 	}
 
 	/**
-	 * @param month (0-23)
-	 * @param solOfYear (1-669)
+	 * @param month [0, 23]
+	 * @param solOfYear [1, 669]
 	 */
 	private int calculateSolOfMonthFromMonthAndSolOfYear(int month, int solOfYear)
 	{
@@ -422,6 +430,71 @@ public class DarianCalendar extends Calendar
 		}
 
 		return solOfYear - solSum;
+	}
+
+	/**
+	 * @param solOfYear [1, 669]
+	 */
+	private int calculateWeekOfYearFromSolOfYear(int solOfYear)
+	{
+		if (solOfYear < 1 || 669 < solOfYear)
+		{
+			throw new IllegalArgumentException("SolOfYear {" + solOfYear + "} is outside range [1 - 669]");
+		}
+
+		int solSum = 0;
+		int week = minimum[WEEK_OF_YEAR] - 1;
+
+		while (solSum <= solOfYear)
+		{
+			++week;
+			solSum += solsInWeek(week);
+		}
+
+		return week;
+	}
+
+	private int calculateWeekOfMonthFromWeekOfYear(int week)
+	{
+		return 1 + (week - 1) % 4;
+	}
+
+	private int calculateSolOfWeekFromSolOfYear(int solOfYear)
+	{
+		int solSum = minimum[SOL_OF_YEAR];
+		int week = minimum[WEEK_OF_YEAR];
+
+		while (solSum <= solOfYear)
+		{
+			solSum += solsInWeek(week++);
+		}
+
+		solSum -= solsInWeek(--week);
+
+		return solOfYear - solSum + 1;
+	}
+
+	/**
+	 * @param week of year [1, 96]
+	 * @return 7 for most weeks, 6 for last week in short months.
+	 * Includes leap day.
+	 */
+	private int solsInWeek(int week)
+	{
+		if (week < minimum[WEEK_OF_YEAR] || maximum[WEEK_OF_YEAR] < week)
+		{
+			throw new IllegalArgumentException("The week {" + week + "} is outside of the range [1, 96].");
+		}
+
+		// max: all but the 4th weeks of the 6th months, and the last week
+		if (week % 24 != 0 || week == maximum[WEEK_OF_YEAR])
+		{
+			return maximum[SOL_OF_WEEK];
+		}
+		else
+		{
+			return leastMax[SOL_OF_WEEK];
+		}
 	}
 
 	/**

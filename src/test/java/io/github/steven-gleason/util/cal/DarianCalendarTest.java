@@ -28,11 +28,11 @@ public class DarianCalendarTest
 		assertEquals(1, testSubject.get(DarianCalendar.ERA));
 		assertEquals(0, testSubject.get(DarianCalendar.YEAR));
 		assertEquals(DarianCalendar.SAGITTARIUS, testSubject.get(DarianCalendar.MONTH));
-		//assertEquals(1, testSubject.get(DarianCalendar.WEEK_OF_YEAR));
-		//assertEquals(1, testSubject.get(DarianCalendar.WEEK_OF_MONTH));
+		assertEquals(1, testSubject.get(DarianCalendar.WEEK_OF_YEAR));
+		assertEquals(1, testSubject.get(DarianCalendar.WEEK_OF_MONTH));
 		assertEquals(1, testSubject.get(DarianCalendar.SOL_OF_MONTH));
 		assertEquals(1, testSubject.get(DarianCalendar.SOL_OF_YEAR));
-		//assertEquals(DarianCalendar.SOLIS, testSubject.get(DarianCalendar.SOL_OF_WEEK));
+		assertEquals(DarianCalendar.SOLIS, testSubject.get(DarianCalendar.SOL_OF_WEEK));
 		//assertEquals(1, testSubject.get(DarianCalendar.SOL_OF_WEEK_IN_MONTH));
 	}
 
@@ -49,8 +49,5 @@ public class DarianCalendarTest
 		assertEquals(0, testSubject.get(DarianCalendar.MILLISECOND));
 		assertEquals(0, testSubject.get(DarianCalendar.ZONE_OFFSET));
 		assertEquals(0, testSubject.get(DarianCalendar.DST_OFFSET));
-
-
-
 	}
 }
